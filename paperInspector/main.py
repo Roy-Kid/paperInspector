@@ -215,8 +215,6 @@ class PaperSpider:
 
 if __name__ == "__main__":
 
-
-    
     mainWindow = PaperSpider()
 
     sys.exit(mainWindow.app.exec_())

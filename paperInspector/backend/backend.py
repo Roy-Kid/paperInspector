@@ -4,10 +4,9 @@
 # contact: lijichen365@126.com
 
 import os, yaml, sys
-from backend.scihubTab.RefParse.refparse.api import RefAPI
+
 from backend.wordfreqTab.parser import PdfParser
 from backend.scihubTab.scihubpy.scihub.scihub import SciHub
-
 
 class Backend:
 
@@ -72,47 +71,28 @@ class Backend:
     def set_proxy_using_by_scihub(self, proxy):
         sh = getattr(self, 'scihub', None)
         if sh is None:
-            self.scihub = SciHub()
-            sh = self.scihub
+            sh = self.scihub = SciHub(proxy)
         
         sh.set_proxy(proxy)
 
     def clear_proxy_using_by_scihub(self):
         sh = getattr(self, 'scihub', None)
         if sh is None:
-            self.scihub = SciHub()
-            sh = self.scihub
+            sh = self.scihub = SciHub()
 
         sh.clear_proxy()
 
     def download_from_scihub(self, source):
         sh = getattr(self, 'scihub', None)
         if sh is None:
-            self.scihub = SciHub()
-            sh = self.scihub
+            sh = self.scihub = SciHub()
 
         sh.download(source)
 
-    def parse_doi_arXiv(self, reference):
+    def parse_doi_arXiv(self, identifier):
 
-        CURPATH = os.path.dirname(os.path.realpath(__file__))
+        sh = getattr(self, 'scihub', None)
+        if sh is None:
+            sh = self.scihub = SciHub()
 
-        with open(os.path.join(CURPATH, "scihubTab/RefParse/refparse/config.yaml"), "r") as config:
-            FORMAT_CONFIG = yaml.load(config, Loader=yaml.SafeLoader)
-
-        formats = list(FORMAT_CONFIG.keys())
-
-        for ref_format in formats:
-            if ref_format not in FORMAT_CONFIG:
-                # TODO: add a log
-                # cli_logger.error(f"{ref_format} not defined")
-                return
-
-        api = RefAPI(reference, FORMAT_CONFIG)
-        results = []
-        if api.status:
-            for ref_format in formats:
-                results.append((ref_format, api.render(ref_format)))
-
-        return results
-
+        return sh.cite(identifier)
