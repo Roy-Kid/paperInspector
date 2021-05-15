@@ -17,23 +17,22 @@ class PdfParser:
             }
         }
 
-    def __init__(self, pdfPath, journal='UNDEFINED') -> None:
-        self.pdfPath = pdfPath
-        self.pdfname = pdfPath.split('/')[-1]
-        self.journal = journal
-        self.pdf, self.metadata, self.pages = self._parse(self.pdfname)
+    def __init__(self) -> None:
+        pass
 
+    def __call__(self, ref):
+        self.parse(ref)
 
-    def _parse(self, pdfname):
+    def parse(self, ref):
 
         # pdf is a pdfplumber.PDF instance
-        pdf = pdfplumber.open(pdfname)
+        pdf = pdfplumber.open(ref.path)
             
         # pdf has two properties: metadata..
-        metadata = pdf.metadata
+        ref.metadata = pdf.metadata
 
         # ...and pages:list contains per page:Page
-        pages = pdf.pages
+        ref.pages = pdf.pages
 
         # TODO: template of the journals
         # e.g. JACS: {
@@ -45,17 +44,20 @@ class PdfParser:
         
         # pages = [p.crop(self.template[self.journal]['bounding_box'], relative=False) for p in pages]
 
-        return pdf, metadata, pages
+        # pipline
+        ref.words = self.extract_words(ref)
+        ref.isParsed = True
 
 
-    def extract_words(self) -> list:
+
+    def extract_words(self, ref) -> list:
 
         """ 提取文中的单词, 以单词出现在文中的位置为准. 返回的是包含大量dict的list, 每一个dict包含单词本身'text', 和跟位置有关的各种是属性
 
         """
 
         self.words = []
-        for p in self.pages:
+        for p in ref.pages:
 
             rawSeq = p.extract_words(x_tolerance=3, y_tolerance=3, keep_blank_chars=False, use_text_flow=False, horizontal_ltr=True, vertical_ttb=True, extra_attrs=[])
 

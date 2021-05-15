@@ -39,7 +39,6 @@ class ScihubTab(Tab):
     @Slot()
     def _on_proxy_set(self):
         proxy = self.window.proxyEdit.text()
-        print(proxy)
         self.backend.set_proxy_using_by_scihub(proxy)
 
     @Slot()

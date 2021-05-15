@@ -7,7 +7,7 @@
 from referenceTab import ReferenceTab
 import sys, os, logging
 
-from PySide6.QtCore import QFile, QIODevice
+from PySide6.QtCore import QFile, QIODevice, QThreadPool
 # sys.path.append(os.getcwd())
 from backend.backend import Backend
 from scihubTab import ScihubTab
@@ -36,11 +36,11 @@ class PaperSpider:
     def __init__(self) -> None:
         
         self.app, self.window = self.initUI("mainWindow.ui")
-
+        self.threadPool = QThreadPool()
         self.backend = Backend()
         self.referenceTab = ReferenceTab(self, self.window, self.backend)
         self.scihubTab = ScihubTab(self, self.window, self.backend)
-        self.wordFreqTab = WordFreqTab(self, self.window, self.backend)
+        # self.wordFreqTab = WordFreqTab(self, self.window, self.backend)
 
 
     def initUI(self, uiname):

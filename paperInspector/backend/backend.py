@@ -3,10 +3,10 @@
 # author: Roy Kid
 # contact: lijichen365@126.com
 
-import os, yaml, sys
 
-from backend.wordfreqTab.parser import PdfParser
+# from backend.wordfreqTab.parser import PdfParser
 from backend.scihubTab.scihubpy.scihub.scihub import SciHub
+from backend.referenceTab.refParse import ParseQueue
 
 class Backend:
 
@@ -96,3 +96,8 @@ class Backend:
             sh = self.scihub = SciHub()
 
         return sh.cite(identifier)
+
+    def parse_ref(self, refs, window):
+        self.parseQueue = ParseQueue(refs, window)
+        self.parseQueue.updateProgress.connect(lambda x: window.progressBar.setValue(x))
+        self.parseQueue.start()
