@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1184</width>
-    <height>619</height>
+    <width>1255</width>
+    <height>946</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -51,38 +51,24 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>309</width>
-              <height>283</height>
+              <width>329</width>
+              <height>582</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_4">
              <item>
               <layout class="QHBoxLayout" name="horizontalLayout_5">
                <item>
-                <widget class="QListWidget" name="refListView">
-                 <property name="selectionMode">
-                  <enum>QAbstractItemView::ExtendedSelection</enum>
+                <widget class="QTableView" name="refTableView">
+                 <property name="editTriggers">
+                  <set>QAbstractItemView::NoEditTriggers</set>
                  </property>
-                 <property name="sortingEnabled">
-                  <bool>true</bool>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QScrollBar" name="verticalScrollBar">
-                 <property name="orientation">
-                  <enum>Qt::Vertical</enum>
+                 <property name="selectionBehavior">
+                  <enum>QAbstractItemView::SelectRows</enum>
                  </property>
                 </widget>
                </item>
               </layout>
-             </item>
-             <item>
-              <widget class="QScrollBar" name="horizontalScrollBar">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-              </widget>
              </item>
             </layout>
            </widget>
@@ -112,7 +98,7 @@
       <item>
        <widget class="QTabWidget" name="tabWidget">
         <property name="currentIndex">
-         <number>1</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="wordFreqTab">
          <attribute name="title">
@@ -211,20 +197,13 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>189</width>
-                  <height>91</height>
+                  <width>220</width>
+                  <height>369</height>
                  </rect>
                 </property>
                 <layout class="QHBoxLayout" name="horizontalLayout_7">
                  <item>
                   <widget class="QListWidget" name="sourceList"/>
-                 </item>
-                 <item>
-                  <widget class="QScrollBar" name="verticalScrollBar_2">
-                   <property name="orientation">
-                    <enum>Qt::Vertical</enum>
-                   </property>
-                  </widget>
                  </item>
                 </layout>
                </widget>
@@ -370,7 +349,7 @@ p, li { white-space: pre-wrap; }
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1184</width>
+     <width>1255</width>
      <height>22</height>
     </rect>
    </property>
