@@ -1,17 +1,11 @@
-# from backend.referenceTab.refParse import ParseQueue
-
 from PySide6.QtCore import Slot
 from backend.referenceTab.reference import RefTab, Reference
 from PySide6.QtWidgets import QFileDialog
-from base import Tab
 
+class ReferenceTab:
 
-
-class ReferenceTab(Tab):
-
-    def __init__(self, app, window, backend):
-        super().__init__(app, window, backend)
-
+    def __init__(self, window):
+        self.window = window
         self.table = self.window.refTableView
 
         self.model = RefTab()
@@ -25,6 +19,10 @@ class ReferenceTab(Tab):
     @property
     def columnName(self):
         return self.model.columnName
+
+    @property
+    def model(self):
+        return self.model
 
     def set_interaction_logic(self):
 
@@ -76,11 +74,7 @@ class ReferenceTab(Tab):
 
     @Slot()
     def _on_parse(self):
-        self.backend.parse_ref(self.references, self.window)
-
-        # self.parseQueue = ParseQueue(self.references, self.window)
-        # self.parseQueue.updateProgress.connect(lambda x: self.window.progressBar.setValue(x))
-        # self.parseQueue.start()
+        self.backend.parse_ref( self.model, self.references, self.window)
 
     def update(self):
         self.window.refCountNum.setText(str(self.model.rowCount()))

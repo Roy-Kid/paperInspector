@@ -6,44 +6,46 @@
 
 # from backend.wordfreqTab.parser import PdfParser
 from backend.scihubTab.scihubpy.scihub.scihub import SciHub
-from backend.referenceTab.refParse import ParseQueue
+from backend.referenceTab.refParseWorker import RefParseWorker
 
 class Backend:
 
     def __init__(self) -> None:
         self.refPaths = []
         self.refPDFParsers = []
+        self.RefParseWorker = RefParseWorker(model, refs, window)
 
-    def update_refs(self, refPaths):
 
-        #! TODO: incremental update
-        for refPath in refPaths:
-            if refPath not in self.refPaths:
-                self.refPaths.append(refPath)
-                pdfperser = PdfParser(refPath)
+    # def update_refs(self, refPaths):
 
-                # ---npl process section---
-                # e.g. exclude verbose
+    #     #! TODO: incremental update
+    #     for refPath in refPaths:
+    #         if refPath not in self.refPaths:
+    #             self.refPaths.append(refPath)
+    #             pdfperser = PdfParser(refPath)
 
-                # ---npl process end---
-                self.refPDFParsers.append(pdfperser)
+    #             # ---npl process section---
+    #             # e.g. exclude verbose
 
-    def drawWordCloud(self):
-        words = []
-        for parser in self.refPDFParsers:
-            words.extend(parser.extract_words())
-        from collections import Counter
+    #             # ---npl process end---
+    #             self.refPDFParsers.append(pdfperser)
 
-        import wordcloud
+    # def drawWordCloud(self):
+    #     words = []
+    #     for parser in self.refPDFParsers:
+    #         words.extend(parser.extract_words())
+    #     from collections import Counter
 
-        word_counts = Counter(words)
+    #     import wordcloud
+
+    #     word_counts = Counter(words)
         
-        with open('word_counts', 'w', encoding='utf-8') as f:
-            f.write(str(word_counts))
+    #     with open('word_counts', 'w', encoding='utf-8') as f:
+    #         f.write(str(word_counts))
         
-        wordCloudDraw = wordcloud.WordCloud()
-        wordCloudDraw.generate_from_frequencies(word_counts)
-        return wordCloudDraw  # "WordFreQ.png")
+    #     wordCloudDraw = wordcloud.WordCloud()
+    #     wordCloudDraw.generate_from_frequencies(word_counts)
+    #     return wordCloudDraw  # "WordFreQ.png")
 
     def fetch_from_scihub(self, source):
         sh = getattr(self, 'scihub', None)
@@ -97,7 +99,6 @@ class Backend:
 
         return sh.cite(identifier)
 
-    def parse_ref(self, refs, window):
-        self.parseQueue = ParseQueue(refs, window)
-        self.parseQueue.updateProgress.connect(lambda x: window.progressBar.setValue(x))
-        self.parseQueue.start()
+    def parse_ref(self, model, refs, window):
+        self.RefParseWorker.updateProgress.connect(lambda x: window.progressBar.setValue(x))
+        self.RefParseWorker.start()

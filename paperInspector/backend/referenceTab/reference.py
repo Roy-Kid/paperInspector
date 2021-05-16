@@ -56,9 +56,3 @@ class RefTab(QAbstractTableModel):
                 return self.columnName[section]
             if orientation == Qt.Vertical:
                 return section
-
-    def setData(self, index, value, role: int):
-        row = index.row()
-        column = index.column()
-        setattr((self.references[row], self.columnName[column], value))
-
