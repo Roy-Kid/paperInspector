@@ -1,5 +1,4 @@
-from PySide6 import QtGui
-from PySide6.QtCore import QAbstractTableModel, QModelIndex, Qt
+
 from itertools import compress
 
 class Reference:
@@ -20,39 +19,3 @@ class Reference:
     @property
     def excludedWords(self):
         return list(compress(self.words, self.exclude_word_mask))
-
-class RefTab(QAbstractTableModel):
-
-    def __init__(self):
-        super().__init__()
-        self.references = []
-        self.columnName = ['Status', 'Title', 'Author', 'Journal', 'Year']
-
-    def rowCount(self, parent=QModelIndex()) -> int:
-        return len(self.references)
-
-    def columnCount(self, parent=QModelIndex()) -> int:
-        return len(self.columnName) 
-
-    def data(self, index: QModelIndex, role: int):
-        i = index.row()
-        j = index.column()
-        columnName = self.columnName[j].lower()
-
-        if role == Qt.DisplayRole and columnName != 'status':
-            return f'{getattr(self.references[i], columnName, "None")}'
-
-        if role == Qt.DecorationRole and columnName == 'status':
-            parsed = self.references[i].isParsed
-
-            if parsed:
-                return QtGui.QIcon('assets/tick.png')
-            return QtGui.QIcon('assets/cross.png')
-
-    def headerData(self, section, orientation, role):
-        # section: int
-        if role == Qt.DisplayRole:
-            if orientation == Qt.Horizontal:
-                return self.columnName[section]
-            if orientation == Qt.Vertical:
-                return section

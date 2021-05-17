@@ -3,7 +3,9 @@ from PySide6.QtCore import Slot
 
 class ScihubTab:
 
-    def __init__(self, window, backend) :
+    def __init__(self, app) :
+        self.app = app
+        self.window = app.window
 
         self.window.refIdentifierEdit.setPlaceholderText('DOI|PMID|URL')
         self.window.proxyEdit.setPlaceholderText('http://127.0.0.1:8889')

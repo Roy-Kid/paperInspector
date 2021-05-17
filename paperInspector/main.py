@@ -36,16 +36,15 @@ class PaperSpider:
     def __init__(self) -> None:
         
         self.app, self.window = self.initUI("mainWindow.ui")
-        self.threadPool = QThreadPool()
+        self.backend = Backend(self)
 
-        self.referenceTab = ReferenceTab(self.window, self.backend)
+        self.referenceTab = ReferenceTab(self)
         self.model = self.referenceTab.model
-        self.references = self.referenceTab.references
+        
 
-        self.scihubTab = ScihubTab(self, self.window, self.backend)
-        self.wordFreqTab = WordFreqTab(self, self.window, self.backend)
+        self.scihubTab = ScihubTab(self)
+        # self.wordFreqTab = WordFreqTab(self.window)
 
-        self.backend = Backend(self.model, self.references, self.window)
 
 
     def initUI(self, uiname):

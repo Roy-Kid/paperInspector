@@ -1,23 +1,27 @@
 from backend.referenceTab.parser import PdfParser
-from PySide6.QtCore import QThread, Signal, Slot
+from PySide6.QtCore import QModelIndex, QRunnable, Signal, Slot, QObject
 
 
-class RefParseWorker(QThread):
+class WokerSignals(QObject):
 
-    updateProgress = Signal(int)
+    finished = Signal()
+    progress = Signal(int)
+    # error = Signal(str)
+    # result = Signal(dict)
 
 
-    def __init__(self, model, references, window):
+class RefParseWorker(QRunnable):
+
+    signals = WokerSignals()
+    
+    def __init__(self, backend):
         super().__init__()
-        self.model = model
-        self.references = references
-        self.window = window
+        self.backend = backend
+        self.references = backend.references
         self.parser = PdfParser()
 
     @Slot()
     def run(self):
-
-        total = len(self.references)
 
         for i, ref in enumerate(self.references):
 
@@ -25,10 +29,8 @@ class RefParseWorker(QThread):
                 self.parser(ref)
             else:
                 continue
-            index = self.model.index(i, 0)
-            progress = int(i*100/total)
-            self.updateProgress.emit(progress)    
-            self.model.dataChanged.emit(index, index)
 
-        self.updateProgress.emit(100)
+            self.signals.progress.emit(i)
+
+        self.signals.finished.emit()
 

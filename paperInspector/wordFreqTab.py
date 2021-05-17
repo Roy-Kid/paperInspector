@@ -1,4 +1,4 @@
-from base import Tab
+
 from PySide6.QtCore import Slot
 
 from PySide6.QtGui import QAction, QImage, QPixmap
@@ -7,7 +7,7 @@ from PySide6.QtWidgets import QGraphicsPixmapItem, QGraphicsScene
 from PySide6.QtCore import Slot
 
 
-class WordFreqTab(Tab):
+class WordFreqTab:
 
     def __init__(self, app, window, backend):
         super().__init__(app, window, backend)

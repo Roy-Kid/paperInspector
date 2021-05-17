@@ -1,28 +1,21 @@
 from PySide6.QtCore import Slot
-from backend.referenceTab.reference import RefTab, Reference
+from backend.referenceTab.reference import Reference
 from PySide6.QtWidgets import QFileDialog
+from PySide6 import QtGui
+from PySide6.QtCore import QAbstractTableModel, QModelIndex, Qt
 
 class ReferenceTab:
 
-    def __init__(self, window):
-        self.window = window
+    def __init__(self, app):
+        self.app = app
+        self.window = app.window
+        self.backend = app.backend
         self.table = self.window.refTableView
 
-        self.model = RefTab()
+        self.model = RefTab(self.app)
         self.table.setModel(self.model)
+        self.set_interaction_logic()
         # self.table.horizontalHeader().setSectionResizeMode(QHeaderView)
-
-    @property
-    def references(self):
-        return self.model.references
-
-    @property
-    def columnName(self):
-        return self.model.columnName
-
-    @property
-    def model(self):
-        return self.model
 
     def set_interaction_logic(self):
 
@@ -49,10 +42,10 @@ class ReferenceTab:
             #     widgetres.append(self.listWidget.item(i).text())
             # print(widgetres)
             refTitle = refPath.split('/')[-1]
-            if refTitle not in self.references:
+            if refTitle not in self.model.references:
                 # https://doc.qt.io/qtforpython/PySide6/QtWidgets/QListWidget.html
                 # self.window.refView.addItem(QListWidgetItem(refTitle))
-                self.model.references.append(Reference(refTitle, refPath))
+                self.model.addRef(refTitle, refPath)
                 self.model.layoutChanged.emit()
 
             else:
@@ -65,18 +58,62 @@ class ReferenceTab:
         
         selecteds = self.table.selectedIndexes()
         toDelete = []
-        for index in selecteds[::self.model.columnCount()]:
-            toDelete.append(self.references[index.row()].title)
+        for index in selecteds[1::self.model.columnCount()]:
+            toDelete.append(self.model.data(index, role=Qt.DisplayRole))
 
-        self.model.references = [ref for ref in self.references if ref not in toDelete]
+        self.backend.removeRef(toDelete)
         self.model.layoutChanged.emit()
         self.update()
 
     @Slot()
     def _on_parse(self):
-        self.backend.parse_ref( self.model, self.references, self.window)
+        self.backend.parse_ref()
 
     def update(self):
         self.window.refCountNum.setText(str(self.model.rowCount()))
 
+
+class RefTab(QAbstractTableModel):
+
+    def __init__(self, app):
+        super().__init__()
+        self.app = app
+        self.columnName = ['Status', 'Title', 'Author', 'Journal', 'Year']
+
+    @property
+    def references(self):
+        return self.app.backend.references
+
+    def rowCount(self, parent=QModelIndex()) -> int:
+        return len(self.references)
+
+    def columnCount(self, parent=QModelIndex()) -> int:
+        return len(self.columnName) 
+
+    def data(self, index: QModelIndex, role: int):
+        i = index.row()
+        j = index.column()
+        columnName = self.columnName[j].lower()
+
+        if role == Qt.DisplayRole and columnName != 'status':
+            return f'{getattr(self.references[i], columnName, "None")}'
+
+        if role == Qt.DecorationRole and columnName == 'status':
+            parsed = self.references[i].isParsed
+
+            if parsed:
+                return QtGui.QIcon('assets/tick.png')
+            return QtGui.QIcon('assets/cross.png')
+
+    def headerData(self, section, orientation, role):
+        # section: int
+        if role == Qt.DisplayRole:
+            if orientation == Qt.Horizontal:
+                return self.columnName[section]
+            if orientation == Qt.Vertical:
+                return section
+
+    def addRef(self, refTitle, refPath):
+
+        self.app.backend.addRef(refTitle, refPath)
 
