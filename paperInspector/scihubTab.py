@@ -10,6 +10,7 @@ class ScihubTab:
 
         self.window.refIdentifierEdit.setPlaceholderText('DOI|PMID|URL')
         self.window.proxyEdit.setPlaceholderText('http://127.0.0.1:8889')
+        # self.window.proxyEdit.setWindowText('http://127.0.0.1:8889')
         self.set_interaction_logic()
 
 
@@ -18,12 +19,15 @@ class ScihubTab:
         self.window.refreshSourceButton.clicked.connect(self._on_refresh)
         self.window.submitButton.clicked.connect(self._on_submit)
         self.window.setProxyButton.clicked.connect(self._on_proxy_set)
+        self.window.clearProxyButton.clicked.connect(self._on_proxy_clear)
         self.window.downloadButton.clicked.connect(self._on_download)
 
     @Slot()
     def _on_submit(self):
+
         refSource = self.window.refIdentifierEdit.text()
         self.backend.parse_doi_arXiv(refSource)
+
 
 
     @Slot()
@@ -31,16 +35,14 @@ class ScihubTab:
         # set both min & max to 0 to switch progressBar to BUSY state
         # see: https://doc.qt.io/qtforpython/PySide6/QtWidgets/QProgressBar.html
         # use progressBar.setValue(int) to determine progress
-        self.window.progressBar.setMinimum(0)
-        self.window.progressBar.setMaximum(0)
+
         urls = self.backend.find_avaliable_scihub_urls()
         self.window.sourceList.addItems(urls)
-        self.window.progressBar.setMinimum(0)
-        self.window.progressBar.setMaximum(100)
+
 
     @Slot()
     def _on_proxy_set(self):
-        proxy = self.window.proxyEdit.text()
+        proxy = self.window.proxyEdit.text().strip() or 'http://127.0.0.1:8889'
         self.backend.set_proxy_using_by_scihub(proxy)
 
     @Slot()
@@ -49,5 +51,6 @@ class ScihubTab:
 
     @Slot()
     def _on_download(self):
+
         refSource = self.window.refIdentifierEdit.text()
         self.backend.download_from_scihub(refSource)

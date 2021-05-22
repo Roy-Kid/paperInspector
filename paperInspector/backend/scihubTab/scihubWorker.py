@@ -1,9 +1,11 @@
-from backend.scihubTab.scihubpy.scihub.scihub import SciHub
+
 from PySide6.QtCore import QObject, QThread, Signal, Slot
+import sys
 
 class WokerSignals(QObject):
 
-    finished = Signal()
+    start = Signal()
+    finish = Signal()
     error = Signal(str)
     result = Signal(dict)
 
@@ -22,6 +24,17 @@ class ScihubWorker(QThread):
     @Slot()
     def run(self):
 
-        result = self.execFn(*self.args)
-            
-        self.signals.result.emit(result)
+        self.signals.start.emit()
+
+        try:
+            result = self.execFn(*self.args)
+            self.signals.result.emit(result)
+        except ValueError as e:
+            self.signals.error.emit(e)
+            self.signals.finish.emit()
+        else:
+            print('error: ', sys.exc_info[0] )
+            self.signals.error.emit(sys.exc_info[0])
+            self.signals.finish.emit()
+
+        self.signals.finish.emit()

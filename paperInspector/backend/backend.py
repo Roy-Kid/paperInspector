@@ -9,6 +9,7 @@ from backend.scihubTab.scihubpy.scihub.scihub import SciHub
 from backend.referenceTab.reference import Reference
 from backend.scihubTab.scihubWorker import ScihubWorker
 from backend.referenceTab.refParseWorker import RefParseWorker
+import log
 
 class Backend:
 
@@ -70,38 +71,60 @@ class Backend:
     #     return sh.fetch(source)
 
     def find_avaliable_scihub_urls(self):
-        
-        sh = getattr(self, 'scihub', None)
-        if sh is None:
-            self.scihub = SciHub()
-            sh = self.scihub
+    
+        log.applog.info('retrieving available urls...')
 
-        return sh.available_base_url_list
+        execFn = self.sh.get_available_scihub_urls
+        self.scihubWorker = ScihubWorker(self, execFn)
+        self.scihubWorker.signals.start.connect(lambda x=0: self.app.window.progressBar.setMaximum(x))
+        self.scihubWorker.signals.finish.connect(lambda x=100: self.app.window.progressBar.setMaximum(x))
+        try:
+            self.scihubWorker.run()
+            return self.sh.available_base_url_list
+        except:
+            log.applog.error('check_hostname requires server_hostname, may set proxy first')
 
-    # def set_proxy_using_by_scihub(self, proxy):
-    #     sh = getattr(self, 'scihub', None)
-    #     if sh is None:
-    #         sh = self.scihub = SciHub(proxy)
-        
-    #     sh.set_proxy(proxy)
+        return ''
 
-    # def clear_proxy_using_by_scihub(self):
-    #     sh = getattr(self, 'scihub', None)
-    #     if sh is None:
-    #         sh = self.scihub = SciHub()
 
-    #     sh.clear_proxy()
+    def set_proxy_using_by_scihub(self, proxy):
+        log.applog.info(f'proxy set {proxy}')
+        self.sh.set_proxy(proxy)
+
+    def clear_proxy_using_by_scihub(self):
+
+        log.applog.info(f'proxy clear')
+        self.sh.clear_proxy()
 
     def download_from_scihub(self, source):
 
-        execFn = self.sh.download
-        self.scihubWorker = ScihubWorker(self, execFn, source)
-        # self.scihubWorker.signals.result.connect()
-        self.scihubWorker.run()
+
+        if self.sh.base_url:
+
+            log.applog.info(f'downloading {source}...')
+            execFn = self.sh.download
+            # test doi: DOI: 10.1063/1.2357935
+            self.scihubWorker = ScihubWorker(self, execFn, source)
+            self.scihubWorker.signals.start.connect(lambda x=0: self.app.window.progressBar.setMaximum(x))
+            self.scihubWorker.signals.finish.connect(lambda x=100: self.app.window.progressBar.setMaximum(x))
+            self.scihubWorker.run()
+            self.scihubWorker.signals.start.connect(lambda x: self.app.window.progressBar.setMaximum(0))
+
+            self.scihubWorker.signals.finish.connect(lambda x: self.app.window.progressBar.setMaximum(100))
+            log.applog.info(f'done.')
+
+        else:
+            self.find_avaliable_scihub_urls()
 
     def parse_doi_arXiv(self, identifier):
         execFn = self.sh.cite
+        log.applog.info(f'fetching {identifier}')
         self.scihubWorker = ScihubWorker(self, execFn, identifier)
+        
+        self.scihubWorker.signals.start.connect(lambda x: self.app.window.progressBar.setMaximum(0))
+
+        self.scihubWorker.signals.finish.connect(lambda x: self.app.window.progressBar.setMaximum(100))
+
         self.scihubWorker.signals.result.connect(lambda x: self.app.window.metaDataDisplay.setPlainText(str(x)))
         self.scihubWorker.start()
 # self.app.window.metaDataDisplay.setPlainText
@@ -111,9 +134,11 @@ class Backend:
             index = self.app.model.index(i, 0)
             index.data = True
             self.app.model.dataChanged.emit(index, index)
-            
+
         self.refParseWorker = RefParseWorker(self)
+
         self.refParseWorker.signals.progress.connect(lambda x: self.app.window.progressBar.setValue(x))
         self.refParseWorker.signals.progress.connect(refresh_status)
         self.refParseWorker.signals.finished.connect(lambda x=100: self.app.window.progressBar.setValue(x))
+
         self.threadpool.start(self.refParseWorker)
