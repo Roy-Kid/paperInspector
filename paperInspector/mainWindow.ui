@@ -365,7 +365,7 @@ p, li { white-space: pre-wrap; }
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_8">
        <item>
-        <widget class="QTextEdit" name="logBrowser"/>
+        <widget class="QPlainTextEdit" name="logBrowser"/>
        </item>
       </layout>
      </widget>

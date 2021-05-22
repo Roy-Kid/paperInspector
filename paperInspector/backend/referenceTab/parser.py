@@ -5,7 +5,6 @@
 
 # https://github.com/jsvine/pdfplumber
 import pdfplumber
-
 class PdfParser:
 
     template = {

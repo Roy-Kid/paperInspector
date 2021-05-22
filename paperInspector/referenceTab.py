@@ -3,6 +3,7 @@ from backend.referenceTab.reference import Reference
 from PySide6.QtWidgets import QFileDialog
 from PySide6 import QtGui
 from PySide6.QtCore import QAbstractTableModel, QModelIndex, Qt
+import log
 
 class ReferenceTab:
 
@@ -19,7 +20,6 @@ class ReferenceTab:
 
     def set_interaction_logic(self):
 
-        ####### Reference Count Section #######
         self.window.addButton.clicked.connect(self._on_add_click)
         self.window.removeButton.clicked.connect(self._on_remove_click)
         self.window.parseButton.clicked.connect(self._on_parse)
@@ -52,6 +52,7 @@ class ReferenceTab:
                 continue
         self.table.resizeColumnsToContents()
         self.update()
+        log.applog.info(f'add {len(refPaths)} references')
 
     @Slot()
     def _on_remove_click(self):
@@ -60,10 +61,11 @@ class ReferenceTab:
         toDelete = []
         for index in selecteds[1::self.model.columnCount()]:
             toDelete.append(self.model.data(index, role=Qt.DisplayRole))
-
         self.backend.removeRef(toDelete)
+        
         self.model.layoutChanged.emit()
         self.update()
+        log.applog.info(f'remove {len(toDelete)} references')
 
     @Slot()
     def _on_parse(self):

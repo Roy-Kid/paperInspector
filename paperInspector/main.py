@@ -5,9 +5,9 @@
 
 
 from referenceTab import ReferenceTab
-import sys, os, logging
+import sys
 
-from PySide6.QtCore import QFile, QIODevice, QThreadPool
+from PySide6.QtCore import QFile, QIODevice, QObject, Signal
 # sys.path.append(os.getcwd())
 from backend.backend import Backend
 from scihubTab import ScihubTab
@@ -15,36 +15,30 @@ from wordFreqTab import WordFreqTab
 from PySide6.QtUiTools import QUiLoader
 from PySide6.QtWidgets import QApplication
 from backend.backend import Backend
-
-### log section ###
-LOG_FORMAT = logging.BASIC_FORMAT
-DATE_FORMAT = '%Y-%m-%d  %H:%M:%S %a '
-
-# record software status
-log = logging.getLogger('root')
-log.addHandler(logging.StreamHandler())
-# record gui info
-loggui = logging.getLogger('gui')
-# record scihubTab info
-logsh = logging.getLogger('sh')
-# record wordFreqTab info
-logwf = logging.getLogger('wf')
+from log import QLogHandler, QLogSingal, applog
 
 
 class PaperSpider:
 
     def __init__(self) -> None:
-        
         self.app, self.window = self.initUI("mainWindow.ui")
+        self.applog = applog
+        QlogHandler = QLogHandler(QLogSingal())
+        QlogHandler.bind_gui(self.window.logBrowser)
+        self.applog.addHandler(QlogHandler)
+        self.applog.info('Welcome to use paperInspector!')
+
+
         self.backend = Backend(self)
 
         self.referenceTab = ReferenceTab(self)
         self.model = self.referenceTab.model
+        self.applog.info('referenceTab init successfully')
         
-
         self.scihubTab = ScihubTab(self)
-        # self.wordFreqTab = WordFreqTab(self.window)
 
+        self.applog.info('scihubTab init successfully')
+        # self.wordFreqTab = WordFreqTab(self.window)
 
 
     def initUI(self, uiname):
@@ -54,14 +48,14 @@ class PaperSpider:
         ui_file_name = uiname
         ui_file = QFile(ui_file_name)
         if not ui_file.open(QIODevice.ReadOnly):
-            loggui.critical(f"Cannot open {ui_file_name}: {ui_file.errorString()}")
+            self.applog.critical(f"Cannot open {ui_file_name}: {ui_file.errorString()}")
             sys.exit(-1)
         loader = QUiLoader()
         window = loader.load(ui_file)
         window.setWindowTitle('paperInspector')
         ui_file.close()
         if not window:
-            loggui.critical(loader.errorString())
+            self.applog.critical(loader.errorString())
             sys.exit(-1)
         window.show()
 
@@ -74,13 +68,9 @@ class PaperSpider:
 
 if __name__ == "__main__":
 
-    log.info(f'paperInspector launch')
-
     mainWindow = PaperSpider()
 
     exec_ = mainWindow.app.exec_()
-
-    log.info(f'paperInspector terminate')
 
     sys.exit(exec_)
 

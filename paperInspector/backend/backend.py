@@ -69,14 +69,14 @@ class Backend:
         # }
     #     return sh.fetch(source)
 
-    # def find_avaliable_scihub_urls(self):
+    def find_avaliable_scihub_urls(self):
         
-    #     sh = getattr(self, 'scihub', None)
-    #     if sh is None:
-    #         self.scihub = SciHub()
-    #         sh = self.scihub
+        sh = getattr(self, 'scihub', None)
+        if sh is None:
+            self.scihub = SciHub()
+            sh = self.scihub
 
-    #     return sh.available_base_url_list
+        return sh.available_base_url_list
 
     # def set_proxy_using_by_scihub(self, proxy):
     #     sh = getattr(self, 'scihub', None)
@@ -102,15 +102,16 @@ class Backend:
     def parse_doi_arXiv(self, identifier):
         execFn = self.sh.cite
         self.scihubWorker = ScihubWorker(self, execFn, identifier)
-        self.scihubWorker.signals.result.connect(self.app.window.metaDataDisplay)
+        self.scihubWorker.signals.result.connect(lambda x: self.app.window.metaDataDisplay.setPlainText(str(x)))
         self.scihubWorker.start()
-
+# self.app.window.metaDataDisplay.setPlainText
     def parse_ref(self):
 
         def refresh_status(i):
             index = self.app.model.index(i, 0)
             index.data = True
             self.app.model.dataChanged.emit(index, index)
+            
         self.refParseWorker = RefParseWorker(self)
         self.refParseWorker.signals.progress.connect(lambda x: self.app.window.progressBar.setValue(x))
         self.refParseWorker.signals.progress.connect(refresh_status)

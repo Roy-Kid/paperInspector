@@ -6,9 +6,11 @@ class ScihubTab:
     def __init__(self, app) :
         self.app = app
         self.window = app.window
+        self.backend = app.backend
 
         self.window.refIdentifierEdit.setPlaceholderText('DOI|PMID|URL')
         self.window.proxyEdit.setPlaceholderText('http://127.0.0.1:8889')
+        self.set_interaction_logic()
 
 
     def set_interaction_logic(self):
@@ -21,8 +23,8 @@ class ScihubTab:
     @Slot()
     def _on_submit(self):
         refSource = self.window.refIdentifierEdit.text()
-        data = self.backend.parse_doi_arXiv(refSource)
-        self.window.metaDataDisplay.setPlainText(str(data))
+        self.backend.parse_doi_arXiv(refSource)
+
 
     @Slot()
     def _on_refresh(self):
